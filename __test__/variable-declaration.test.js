@@ -81,4 +81,33 @@ describe('variable-declaration-test', () => {
 
     expect(transformCode(source)).toBe(expected)
   })
+
+  test('VariableDeclarator5', () => {
+    let source = unpad(`
+      // # TestName
+      let a = 1; // #
+    `)
+
+    let expected = unpad(`
+      let a = 1;
+      console.log('TestName', a);
+      console.log('a', a);
+    `)
+
+    expect(transformCode(source)).toBe(expected)
+  })
+
+  test('VariableDeclarator6', () => {
+    let source = unpad(`
+      // #error TestName
+      let a = 1;
+    `)
+
+    let expected = unpad(`
+      let a = 1;
+      console.error('TestName', a);
+    `)
+
+    expect(transformCode(source)).toBe(expected)
+  })
 })
