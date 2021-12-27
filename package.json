@@ -1,0 +1,28 @@
+{
+  "name": "babel-plugin-pretty-console",
+  "version": "1.0.0",
+  "description": "Use hooks for fast log",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TaroXin/babel-plugin-pretty-log.git"
+  },
+  "keywords": [
+    "console.log",
+    "pretty-log"
+  ],
+  "author": "TaroXin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TaroXin/babel-plugin-pretty-log/issues"
+  },
+  "homepage": "https://github.com/TaroXin/babel-plugin-pretty-log#readme",
+  "devDependencies": {
+    "@babel/core": "^7.16.5",
+    "jest": "^27.4.5"
+  },
+  "dependencies": {}
+}
