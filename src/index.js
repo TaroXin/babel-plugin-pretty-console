@@ -54,6 +54,7 @@ module.exports = ({}, options) => {
           if (types.isArrowFunctionExpression(initPath)) {
             // FIXME: ArrowFunctionExpression can't use inner comment hook!
             // Because babel does't return `innerComments` for arrow functions.
+            // see: https://github.com/babel/babel/issues/883
             initPath.node.leadingComments = path.node.leadingComments
             initPath.node.trailingComments = path.node.trailingComments
             initPath.node.innerComments = initPath.get('body').innerComments
@@ -74,6 +75,20 @@ module.exports = ({}, options) => {
       },
       FunctionDeclaration(path) {
         functionDeclaration(path, genOpts(options))
+      },
+      ObjectMethod(path) {
+        const functionId = path.node.key.name
+        functionDeclaration(path, genOpts(options), functionId)
+      },
+      ObjectProperty(path) {
+        const propValue = path.get('value')
+        const propKey = path.node.key.name
+        if (types.isArrowFunctionExpression(propValue)) {
+          propValue.node.leadingComments = path.node.leadingComments
+          propValue.node.trailingComments = path.node.trailingComments
+
+          return functionDeclaration(propValue, genOpts(options), propKey)
+        }
       },
     },
   }
