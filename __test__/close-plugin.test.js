@@ -18,7 +18,7 @@ function transformCode(code) {
   return result.code
 }
 
-describe('close-plugin', () => {
+describe('close-plugin-test', () => {
   test('close-plugin', () => {
     let source = unpad(`
       // #

@@ -1,6 +1,7 @@
 const commentInPath = require('./comment-in-path')
 const genOpts = require('./gen-opts')
 const template = require('@babel/template').default
+const types = require('@babel/types')
 
 function functionDeclaration(path, options, outerFunctionId) {
   const [open, hooks] = commentInPath(path.node, genOpts(options))
@@ -8,6 +9,7 @@ function functionDeclaration(path, options, outerFunctionId) {
   if (open) {
     const insertNodes = []
     const params = path.node.params
+    // `outerFunctionId` is useful for rendering anonymous arrow functions
     const functionId = outerFunctionId || path.node.id.name
 
     if (params && params.length) {
@@ -22,6 +24,7 @@ function functionDeclaration(path, options, outerFunctionId) {
       })
     } else {
       // no params
+      // FIXME: The FunctionDeclaration has no `innerComments`
       hooks.forEach((hook) => {
         const consoleNode = template(`console.${hook.type}('${hook.name || functionId}')`)()
 
@@ -30,40 +33,44 @@ function functionDeclaration(path, options, outerFunctionId) {
     }
 
     const body = path.get('body')
-    body.node.body.unshift(...insertNodes)
+    if (types.isBlockStatement(body.node)) {
+      body.node.body.unshift(...insertNodes)
+    } else {
+      body.replaceWith(types.blockStatement([...insertNodes, types.returnStatement(body.node)]))
+    }
   }
 }
 
-module.exports = ({ types }, options) => {
+module.exports = ({}, options) => {
   return {
     visitor: {
       VariableDeclaration(path) {
-        const [open, hooks] = commentInPath(path.node, genOpts(options))
+        const declarations = path.get('declarations')
+        const insertNodes = []
+        declarations.forEach((n) => {
+          const nodeName = n.node.id.name
+          const initPath = n.get('init')
 
-        if (open) {
-          const declarations = path.get('declarations')
-          const insertNodes = []
-          declarations.forEach((n) => {
-            const nodeName = n.node.id.name
+          if (types.isArrowFunctionExpression(initPath)) {
+            // FIXME: ArrowFunctionExpression can't use inner comment hook!
+            // Because babel does't return `innerComments` for arrow functions.
+            initPath.node.leadingComments = path.node.leadingComments
+            initPath.node.trailingComments = path.node.trailingComments
+            initPath.node.innerComments = initPath.get('body').innerComments
 
-            if (types.isArrowFunctionExpression(n.node.init)) {
-              //
-              const functionPath = n.get('init')
-              // FIXME: ArrowFunctionExpression can only support `leadingComments`
-              // Because babel does't return `innerComments` for arrow function.
-              functionPath.node.leadingComments = path.node.leadingComments
+            return functionDeclaration(initPath, genOpts(options), nodeName)
+          } else {
+            const [open, hooks] = commentInPath(path.node, genOpts(options))
 
-              return functionDeclaration(functionPath, genOpts(options), nodeName)
-            } else {
+            if (open) {
               hooks.forEach((hook) => {
                 const consoleNode = template(`console.${hook.type}('${hook.name || nodeName}', ${nodeName})`)()
-
                 insertNodes.push(consoleNode)
               })
             }
-          })
-          path.insertAfter(insertNodes)
-        }
+          }
+        })
+        insertNodes.length && path.insertAfter(insertNodes)
       },
       FunctionDeclaration(path) {
         functionDeclaration(path, genOpts(options))
