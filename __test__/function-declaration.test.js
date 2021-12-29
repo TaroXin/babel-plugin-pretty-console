@@ -141,6 +141,23 @@ describe('function-declaration-test', () => {
     expect(transformCode(source)).toBe(expected)
   })
 
+  test('ArrowFunctionExpression3', () => {
+    let source = unpad(`
+      // #
+      add = (a, b) => a + b
+    `)
+
+    let expected = unpad(`
+      add = (a, b) => {
+        console.log('add:a', a);
+        console.log('add:b', b);
+        return a + b;
+      };
+    `)
+
+    expect(transformCode(source)).toBe(expected)
+  })
+
   // test('ArrowFunctionExpression2', () => {
   //   let source = unpad(`
   //     let add = (a, b) => { // #
