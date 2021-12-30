@@ -1,12 +1,12 @@
-<div style="display:flex;justify-content:center;align-items:center;flex-flow:column nowrap;border-bottom:1px solid #DEDEDE;padding-bottom:35px">
-  <img src="./icon.png" style="width: 200px; margin: 0 auto;">
-  <div style="font-size:32px;font-weight:bold;margin-top:35px;">
+<p align="center">
+  <img src="http://pic.taroxin.cn/pretty-console.png" width="200" alt="pretty console logo.">
+  <h2 align="center">
     babel-plugin-pretty-console
-  </div>
-  <div style="color:#999;font-size:16px;font-weight:bold;">
-    Use hooks for fast <code>console.log</code>
-  </div>
-</div>
+  </h2>
+  <p align="center">
+    <font color="#999">Use hooks for fast <code>console.log</code></font>
+  </p>
+</p>
 
 ## Install
 
