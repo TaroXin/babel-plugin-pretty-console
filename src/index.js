@@ -10,6 +10,11 @@ module.exports = ({ types, template }, options) => {
     return template(`console.${type}(${printFileName}${name ? "'" + name + "'," : ''}${args.join(',')})`)()
   }
 
+  const entendParentComment = (child, parent) => {
+    child.node.leadingComments = parent.node.leadingComments
+    child.node.trailingComments = parent.node.trailingComments
+  }
+
   // Handle functions or arrow functions,
   // inlcuding functions declared in `Object`.
   const functionDeclaration = (path, outerFunctionId) => {
@@ -69,9 +74,7 @@ module.exports = ({ types, template }, options) => {
             // FIXME: ArrowFunctionExpression can't use inner comment hook!
             // Because babel does't return `innerComments` for arrow functions.
             // see: https://github.com/babel/babel/issues/883
-            initPath.node.leadingComments = path.node.leadingComments
-            initPath.node.trailingComments = path.node.trailingComments
-            initPath.node.innerComments = initPath.get('body').innerComments
+            entendParentComment(initPath, path)
 
             return functionDeclaration(initPath, nodeName)
           } else {
@@ -92,8 +95,7 @@ module.exports = ({ types, template }, options) => {
         const nodeName = path.node.left.name
         const insertNodes = []
         if (types.isArrowFunctionExpression(right)) {
-          right.node.leadingComments = path.node.leadingComments
-          right.node.trailingComments = path.node.trailingComments
+          entendParentComment(right, path)
           return functionDeclaration(right, nodeName)
         } else {
           const [open, hooks] = commentInPath(path.node, genOpts(options))
@@ -116,8 +118,7 @@ module.exports = ({ types, template }, options) => {
         const propValue = path.get('value')
         const propKey = path.node.key.name
         if (types.isArrowFunctionExpression(propValue)) {
-          propValue.node.leadingComments = path.node.leadingComments
-          propValue.node.trailingComments = path.node.trailingComments
+          entendParentComment(propValue, path)
 
           return functionDeclaration(propValue, propKey)
         }
@@ -129,8 +130,7 @@ module.exports = ({ types, template }, options) => {
           types.isAssignmentExpression(declaration) ||
           types.isArrowFunctionExpression(declaration)
         ) {
-          declaration.node.leadingComments = path.node.leadingComments
-          declaration.node.trailingComments = path.node.trailingComments
+          entendParentComment(declaration, path)
         }
 
         if (types.isArrowFunctionExpression(declaration)) {
@@ -140,15 +140,13 @@ module.exports = ({ types, template }, options) => {
       ExportNamedDeclaration(path) {
         const declaration = path.get('declaration')
         if (types.isFunctionDeclaration(declaration) || types.isVariableDeclaration(declaration)) {
-          declaration.node.leadingComments = path.node.leadingComments
-          declaration.node.trailingComments = path.node.trailingComments
+          entendParentComment(declaration, path)
         }
       },
       ExpressionStatement(path) {
         const expression = path.get('expression')
         if (types.isAssignmentExpression(expression)) {
-          expression.node.leadingComments = path.node.leadingComments
-          expression.node.trailingComments = path.node.trailingComments
+          entendParentComment(expression, path)
         }
       },
     },
