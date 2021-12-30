@@ -1,6 +1,12 @@
-# babel-plugin-pretty-console
-
-Use hooks for fast `console.log`
+<div style="display:flex;justify-content:center;align-items:center;flex-flow:column nowrap;border-bottom:1px solid #DEDEDE;padding-bottom:35px">
+  <img src="./icon.png" style="width: 200px; margin: 0 auto;">
+  <div style="font-size:32px;font-weight:bold;margin-top:35px;">
+    babel-plugin-pretty-console
+  </div>
+  <div style="color:#999;font-size:16px;font-weight:bold;">
+    Use hooks for fast <code>console.log</code>
+  </div>
+</div>
 
 ## Install
 
@@ -10,14 +16,11 @@ npm install babel-plugin-pretty-console -D
 
 ## Usage
 
+Configure `PrettyConsole` to your `.babelrc` file.
+
 ```json
-// in .babelrc
 {
-  "plugins": [
-    ["pretty-console", {
-      "token"："#", // <- as default
-    }]
-  ]
+  "plugins": ["pretty-console"]
 }
 ```
 
