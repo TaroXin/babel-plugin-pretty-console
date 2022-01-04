@@ -86,25 +86,6 @@ describe('function-declaration-test', () => {
     expect(transformCode(source)).toBe(expected)
   })
 
-  // test('FunctionDeclaration5 - mutiple hooks', () => {
-  //   let source = unpad(`
-  //     // #log
-  //     function add() { // #warn
-  //       return a + b;
-  //     }
-  //   `)
-
-  //   let expected = unpad(`
-  //     function add() {
-  //       console.log('add');
-  //       console.warn('add');
-  //       return a + b;
-  //     }
-  //   `)
-
-  //   expect(transformCode(source)).toBe(expected)
-  // })
-
   test('ArrowFunctionExpression1', () => {
     let source = unpad(`
       // #log
@@ -157,22 +138,4 @@ describe('function-declaration-test', () => {
 
     expect(transformCode(source)).toBe(expected)
   })
-
-  // test('ArrowFunctionExpression2', () => {
-  //   let source = unpad(`
-  //     let add = (a, b) => { // #
-  //       return a + b;
-  //     };
-  //   `)
-
-  //   let expected = unpad(`
-  //     let add = (a, b) => {
-  //       console.log('add:a', a);
-  //       console.log('add:b', b);
-  //       return a + b;
-  //     };
-  //   `)
-
-  //   expect(transformCode(source)).toBe(expected)
-  // })
 })
