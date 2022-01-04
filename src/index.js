@@ -110,11 +110,11 @@ module.exports = ({ types, template }, options) => {
       FunctionDeclaration(path) {
         functionDeclaration(path)
       },
-      ObjectMethod(path) {
+      'ObjectMethod|ClassMethod'(path) {
         const functionId = path.node.key.name
         functionDeclaration(path, functionId)
       },
-      ObjectProperty(path) {
+      'ObjectProperty|ClassProperty'(path) {
         const propValue = path.get('value')
         const propKey = path.node.key.name
         if (types.isArrowFunctionExpression(propValue)) {

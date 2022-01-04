@@ -138,4 +138,51 @@ describe('function-declaration-test', () => {
 
     expect(transformCode(source)).toBe(expected)
   })
+
+  test('ClassMethod1', () => {
+    let source = unpad(`
+      class Test {
+        // #
+        add(a, b) {
+          return a + b;
+        }
+      }
+    `)
+
+    let expected = unpad(`
+      class Test {
+        add(a, b) {
+          console.log('add:a', a);
+          console.log('add:b', b);
+          return a + b;
+        }
+      
+      }
+    `)
+
+    expect(transformCode(source)).toBe(expected)
+  })
+
+  test('ClassProperty1', () => {
+    let source = unpad(`
+      class Test {
+        // #
+        add = (a, b) => {
+          return a + b;
+        };
+      }
+    `)
+
+    let expected = unpad(`
+      class Test {
+        add = (a, b) => {
+          console.log('add:a', a);
+          console.log('add:b', b);
+          return a + b;
+        };
+      }
+    `)
+
+    expect(transformCode(source)).toBe(expected)
+  })
 })
