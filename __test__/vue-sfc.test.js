@@ -1,6 +1,6 @@
 const babel = require('@babel/core')
 const plugin = require('../src/index')
-const unpad = require('../lib/unpad')
+const rmw = require('../lib/rmw')
 
 function transformCode(code) {
   const result = babel.transform(code, {
@@ -12,24 +12,60 @@ function transformCode(code) {
 
 describe('vue-sfc-test', () => {
   test('declare components', () => {
-    let source = unpad(`
+    let source = `
       export default {
         // #
         created() {
           
         }
       }
-    `)
+    `
 
-    let expected = unpad(`
+    let expected = rmw(`
       export default {
         created() {
           console.log('created');
         }
-
       };
     `)
 
-    expect(transformCode(source)).toBe(expected)
+    expect(rmw(transformCode(source))).toBe(expected)
+  })
+
+  test('declare components 2', () => {
+    let source = `
+      export default {
+        // #
+        created() {
+          // #
+          let res = add(1, 2);
+        },
+        methods: {
+          // #
+          add(a, b) {
+            return a + b;
+          }
+        }
+      }
+    `
+
+    let expected = rmw(`
+      export default {
+        created() {
+          console.log('created');
+          let res = add(1, 2);
+          console.log('res', res);
+        },
+        methods: {
+          add(a, b) {
+            console.log('add:a', a);
+            console.log('add:b', b);
+            return a + b;
+          }
+        }
+      };
+    `)
+
+    expect(rmw(transformCode(source))).toBe(expected)
   })
 })
