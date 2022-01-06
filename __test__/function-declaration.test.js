@@ -1,6 +1,7 @@
 const babel = require('@babel/core')
 const plugin = require('../src/index')
 const unpad = require('../lib/unpad')
+const rmw = require('../lib/rmw')
 
 function transformCode(code) {
   const result = babel.transform(code, {
@@ -184,5 +185,21 @@ describe('function-declaration-test', () => {
     `)
 
     expect(transformCode(source)).toBe(expected)
+  })
+
+  test('Promise function called 1', () => {
+    let source = `
+      TestPromise().then(res => { // #
+      
+      });
+    `
+
+    let expected = rmw(`
+      TestPromise().then(res => {
+        console.log(':res', res);
+      });
+    `)
+
+    expect(rmw(transformCode(source))).toBe(expected)
   })
 })

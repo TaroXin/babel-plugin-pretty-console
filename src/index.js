@@ -16,7 +16,7 @@ module.exports = ({ types, template }, options) => {
   }
 
   // Handle functions or arrow functions,
-  // inlcuding functions declared in `Object`.
+  // inlcuding functions declared in `Object` and `Class`.
   const functionDeclaration = (path, outerFunctionId) => {
     const [open, hooks] = commentInPath(path.node, genOpts(options))
 
