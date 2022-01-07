@@ -1,14 +1,9 @@
 const commentParse = require('./comment-parse')
 
-module.exports = (node, options) => {
-  const commentsList = []
-    .concat(node.leadingComments || [])
-    .concat(node.innerComments || [])
-    .concat(node.trailingComments || [])
-
+module.exports = (node, options, comments = []) => {
   const tokenList = []
-  if (commentsList && commentsList.length) {
-    commentsList.forEach((c) => {
+  if (comments && comments.length) {
+    comments.forEach((c) => {
       const nodeLine = node.loc.start.line
       const line = c.loc.end.line
 

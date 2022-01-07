@@ -3,6 +3,9 @@ const genOpts = require('./gen-opts')
 
 module.exports = ({ types, template }, options) => {
   let filename = ''
+  // cache all comments in file
+  let fileComments = []
+
   const genLog = (type, name = null, ...args) => {
     let opts = genOpts(options)
     let printFileName = opts.printFileName && filename ? "'" + filename + "'," : ''
@@ -10,20 +13,19 @@ module.exports = ({ types, template }, options) => {
     return template(`console.${type}(${printFileName}${name ? "'" + name + "'," : ''}${args.join(',')})`)()
   }
 
-  const entendParentComment = (child, parent) => {
-    child.node.leadingComments = parent.node.leadingComments
-    child.node.trailingComments = parent.node.trailingComments
-  }
-
   // Handle functions or arrow functions,
   // inlcuding functions declared in `Object` and `Class`.
   const functionDeclaration = (path, outerFunctionId) => {
-    const [open, hooks] = commentInPath(path.node, genOpts(options))
+    const [open, hooks] = commentInPath(path.node, genOpts(options), fileComments)
 
     if (open) {
       const insertNodes = []
       const params = path.node.params
-      // `outerFunctionId` is useful for rendering anonymous arrow functions
+      // `outerFunctionId` is useful for rendering
+      // `anonymous arrow functions` or
+      // `properties for Object` or
+      // `properties for Class` or
+      // `Reassign a Variable`
       let functionId = outerFunctionId
       if (!functionId) {
         functionId = path.node.id ? path.node.id.name : ''
@@ -57,8 +59,9 @@ module.exports = ({ types, template }, options) => {
   }
 
   return {
-    pre({ hub }) {
+    pre({ hub, ast }) {
       try {
+        fileComments = ast.comments
         filename = hub.file.opts.generatorOpts.filename
       } catch (error) {}
     },
@@ -69,16 +72,8 @@ module.exports = ({ types, template }, options) => {
         declarations.forEach((n) => {
           const nodeName = n.node.id.name
           const initPath = n.get('init')
-
-          if (types.isArrowFunctionExpression(initPath)) {
-            // FIXME: ArrowFunctionExpression can't use inner comment hook!
-            // Because babel does't return `innerComments` for arrow functions.
-            // see: https://github.com/babel/babel/issues/883
-            entendParentComment(initPath, path)
-
-            return functionDeclaration(initPath, nodeName)
-          } else {
-            const [open, hooks] = commentInPath(path.node, genOpts(options))
+          if (!types.isArrowFunctionExpression(initPath)) {
+            const [open, hooks] = commentInPath(path.node, genOpts(options), fileComments)
 
             if (open) {
               hooks.forEach((hook) => {
@@ -94,60 +89,36 @@ module.exports = ({ types, template }, options) => {
         const right = path.get('right')
         const nodeName = path.node.left.name
         const insertNodes = []
-        if (types.isArrowFunctionExpression(right)) {
-          entendParentComment(right, path)
-          return functionDeclaration(right, nodeName)
-        } else {
-          const [open, hooks] = commentInPath(path.node, genOpts(options))
+        if (!types.isArrowFunctionExpression(right)) {
+          const [open, hooks] = commentInPath(path.node, genOpts(options), fileComments)
           if (open) {
             hooks.forEach((hook) => {
               const log = genLog(hook.type, hook.name || nodeName, nodeName)
               insertNodes.push(log)
             })
           }
+          insertNodes.length && path.insertAfter(insertNodes)
         }
       },
       FunctionDeclaration(path) {
         functionDeclaration(path)
       },
+      ArrowFunctionExpression(path) {
+        let functionId = ''
+        if (types.isAssignmentExpression(path.parent)) {
+          functionId = path.parent.left.name
+        }
+        if (types.isVariableDeclaration(path.parent) || types.isVariableDeclarator(path.parent)) {
+          functionId = path.parent.id.name
+        }
+        if (types.isObjectProperty(path.parent) || types.isClassProperty(path.parent)) {
+          functionId = path.parent.key.name
+        }
+        functionDeclaration(path, functionId)
+      },
       'ObjectMethod|ClassMethod'(path) {
         const functionId = path.node.key.name
         functionDeclaration(path, functionId)
-      },
-      'ObjectProperty|ClassProperty'(path) {
-        const propValue = path.get('value')
-        const propKey = path.node.key.name
-        if (types.isArrowFunctionExpression(propValue)) {
-          entendParentComment(propValue, path)
-
-          return functionDeclaration(propValue, propKey)
-        }
-      },
-      ExportDefaultDeclaration(path) {
-        const declaration = path.get('declaration')
-        if (
-          types.isFunctionDeclaration(declaration) ||
-          types.isAssignmentExpression(declaration) ||
-          types.isArrowFunctionExpression(declaration)
-        ) {
-          entendParentComment(declaration, path)
-        }
-
-        if (types.isArrowFunctionExpression(declaration)) {
-          functionDeclaration(declaration)
-        }
-      },
-      ExportNamedDeclaration(path) {
-        const declaration = path.get('declaration')
-        if (types.isFunctionDeclaration(declaration) || types.isVariableDeclaration(declaration)) {
-          entendParentComment(declaration, path)
-        }
-      },
-      ExpressionStatement(path) {
-        const expression = path.get('expression')
-        if (types.isAssignmentExpression(expression)) {
-          entendParentComment(expression, path)
-        }
       },
     },
   }
