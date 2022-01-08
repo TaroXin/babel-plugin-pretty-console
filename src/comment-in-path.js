@@ -4,7 +4,7 @@ module.exports = (node, options, comments = []) => {
   const tokenList = []
   if (comments && comments.length) {
     comments.forEach((c) => {
-      const nodeLine = node.loc.start.line
+      const nodeLine = node.loc ? node.loc.start.line : -1
       const line = c.loc.end.line
 
       let result = commentParse(c.value, options)
