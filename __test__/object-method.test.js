@@ -38,7 +38,7 @@ describe('object-method-test', () => {
   test('ObjectMethod2', () => {
     let source = unpad(`
       let method = {
-        // #warn TestAddFunction
+        // #warn Test AddFunction
         add(a, b) {
           return a + b;
         }
@@ -48,8 +48,8 @@ describe('object-method-test', () => {
     let expected = unpad(`
       let method = {
         add(a, b) {
-          console.warn('TestAddFunction:a', a);
-          console.warn('TestAddFunction:b', b);
+          console.warn('Test AddFunction:a', a);
+          console.warn('Test AddFunction:b', b);
           return a + b;
         }
       

@@ -1,5 +1,5 @@
 module.exports = (comment, options) => {
-  let [token, name] = comment.trim().split(' ')
+  let [token, ...name] = comment.trim().split(' ')
 
   let isHook = false,
     type = 'log'
@@ -11,6 +11,6 @@ module.exports = (comment, options) => {
   return {
     isHook,
     type,
-    name,
+    name: name.join(' '),
   }
 }
