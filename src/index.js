@@ -1,3 +1,4 @@
+const generate = require('@babel/generator').default
 const commentInPath = require('./comment-in-path')
 const genOpts = require('./gen-opts')
 
@@ -87,7 +88,12 @@ module.exports = ({ types, template }, options) => {
       },
       AssignmentExpression(path) {
         const right = path.get('right')
-        const nodeName = path.node.left.name
+        let nodeName = path.node.left.name
+        if (!nodeName) {
+          // fix: this.a = 1; => console.log('this.a', this.a)
+          let code = generate(path.node.left).code
+          nodeName = code
+        }
         const insertNodes = []
         if (!types.isArrowFunctionExpression(right)) {
           const [open, hooks] = commentInPath(path.node, genOpts(options), fileComments)

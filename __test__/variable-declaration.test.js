@@ -110,4 +110,46 @@ describe('variable-declaration-test', () => {
 
     expect(transformCode(source)).toBe(expected)
   })
+
+  test('VariableDeclarator7', () => {
+    let source = unpad(`
+      // #error TestName
+      this.a = 1;
+    `)
+
+    let expected = unpad(`
+      this.a = 1;
+      console.error('TestName', this.a);
+    `)
+
+    expect(transformCode(source)).toBe(expected)
+  })
+
+  test('VariableDeclarator8', () => {
+    let source = unpad(`
+      // #error
+      this.a = 1;
+    `)
+
+    let expected = unpad(`
+      this.a = 1;
+      console.error('this.a', this.a);
+    `)
+
+    expect(transformCode(source)).toBe(expected)
+  })
+
+  test('VariableDeclarator9', () => {
+    let source = unpad(`
+      // #
+      obj.name.value = 'Taro';
+    `)
+
+    let expected = unpad(`
+      obj.name.value = 'Taro';
+      console.log('obj.name.value', obj.name.value);
+    `)
+
+    expect(transformCode(source)).toBe(expected)
+  })
 })
