@@ -8,6 +8,8 @@
   </p>
 </p>
 
+<a href="https://juejin.cn/post/7057172551746715661">中文文档</a>
+
 ## Install
 
 ```bash
